@@ -76,7 +76,7 @@ BCCH_A3 <- nc_data_dl(collections = "ONATLAS3BE_SUMM",
                       species = 14280, 
                       region = list(bbox = c(left = -83.32, bottom = 41.40, 
                                              right = -73.91, top = 46.93)), 
-                      username = "kbumelis", info = "mapping example")
+                      username = "scottdarocha", info = "mapping example")
 
 ```
 
@@ -102,14 +102,13 @@ BCCH_BE <- BCCH_A3 %>%
 
 ```
 
-In the above code, `left_join` joins the BCCH and BE data, `by=c("breeding_rank = "rank")` lets R know that breeding rank and rank are the columns we want to join on.
-`select` is where we're narrowing down the columns we want in our output, by selecting those three columns to remain in our new dataset
+In the above code, `left_join` joins the BCCH and BE data, `by=c("breeding_rank = "rank")` lets R know that breeding rank and rank are the columns we want to join on. `select` is where we're narrowing down the columns we want in our output, by selecting those three columns to remain in our new dataset
 
 Now that we have our \~1,700 records, lets see if we can map it!
 
 ### Uploading shapefiles
 
-Lets upload our UTM Square shapefile, and then join our BCCH data to it :) 
+Lets upload our UTM Square shapefile, and then join our BCCH data to it :)
 
 1)  don't judge my file paths
 
@@ -117,7 +116,7 @@ Lets upload our UTM Square shapefile, and then join our BCCH data to it :)
 
 ```{r Read in utm_squares}
 
-utm_squares <- st_read("C:/Users/kbumelis/Documents/Atlas/Mapping/Atlas-3 Planning/On_Squares/On_Squares.shp")
+utm_squares <- st_read("C:/Users/sdarocha/Desktop/Scott D/ON Atlas/GIS & Mapping/Atlas Shapefiles/On_Squares")
 
 BCCH_UTM <- utm_squares %>%
   left_join(BCCH_BE, by = c("SQUARE_ID" = "utm_square"))
@@ -126,7 +125,7 @@ BCCH_UTM <- utm_squares %>%
 
 ### Lets map!
 
-First lets set out bounding box of the map to be the same as what we pulled the data for, and get the Open Street Map for it  
+First lets set out bounding box of the map to be the same as what we pulled the data for, and get the Open Street Map for it
 
 ```{r Lets Map!}
 
