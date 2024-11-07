@@ -43,7 +43,7 @@ A summary of the code for reference tables available to us through the NatureCou
 
 ```{r reference tables}
 BE <- meta_breeding_codes()
-BE
+head(BE)
 ```
 
 For this exercise we'll just download the BE table (the species table takes a long time to load)
@@ -98,18 +98,15 @@ BCCH_BE <- BCCH_A3 %>%
   left_join(BE, by = c("breeding_rank" = "rank")) %>%
   select(utm_square, breeding_code, category)
 
-
-
 ```
 
-In the above code, `left_join` joins the BCCH and BE data, `by=c("breeding_rank = "rank")` lets R know that breeding rank and rank are the columns we want to join on.
-`select` is where we're narrowing down the columns we want in our output, by selecting those three columns to remain in our new dataset
+In the above code, `left_join` joins the BCCH and BE data, `by=c("breeding_rank = "rank")` lets R know that breeding rank and rank are the columns we want to join on. `select` is where we're narrowing down the columns we want in our output, by selecting those three columns to remain in our new dataset
 
 Now that we have our \~1,700 records, lets see if we can map it!
 
 ### Uploading shapefiles
 
-Lets upload our UTM Square shapefile, and then join our BCCH data to it :) 
+Lets upload our UTM Square shapefile, and then join our BCCH data to it :)
 
 1)  don't judge my file paths
 
@@ -124,9 +121,13 @@ BCCH_UTM <- utm_squares %>%
 
 ```
 
+Left join and Merge functions are the same, except with left join you need to be more careful about syntax.
+
+`BCCH_UTM <- merge(x=BCCH_BE,y=utm_squares,by.x="utm_square", by.y="SQUARE_ID", all.y=TRUE)`
+
 ### Lets map!
 
-First lets set out bounding box of the map to be the same as what we pulled the data for, and get the Open Street Map for it  
+First lets set out bounding box of the map to be the same as what we pulled the data for, and get the Open Street Map for it
 
 ```{r Lets Map!}
 
@@ -138,4 +139,3 @@ leaflet(data = BCCH_UTM) %>%
   addLegend("bottomright", pal = pal, values = ~category, title = "Category") 
 
 ```
-
