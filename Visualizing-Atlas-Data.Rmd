@@ -18,7 +18,8 @@ Lets see if we can take what we learned in Open Door Science and apply it to Atl
 ```{r packages}
 library(naturecounts) #need this to download NC databases
 library(tidyverse) #collection of R packages for data science - tidyr, dplyr, and ggplot2
-library(leaflet) #this is an interactive map, needed as base for mapview
+library(sf) #mapping
+library(leaflet) #this is an interactive map
 library(mapview) #can take a snapshot of leaflet for static maps
 ```
 
@@ -81,7 +82,62 @@ BCCH_A3 <- nc_data_dl(collections = "ONATLAS3BE_SUMM",
 
 Please note that if you have permissions for a specific collection (rather than blanket permissions to the Atlas) you'll need to include a line for your request ID, the code will look something like this: `request_id = 000000` If you're unsure of your request ID number, you can use the code `nc_requests(username = "testuser")` to find out!
 
-Alrighty - now that we have our \~1,700 records, lets see if we can map it!
+```{r BCCH]}
+
+head(BCCH_A3)
+
+```
+
+As we can see, I've downloaded the dataset of highest BE/Species/SQ.
+
+Lets combine it with the info we have from the BE table, and then filter down the number of columns that we are going to use
+
+```{r Join BE to BCCH & filter}
+
+BCCH_BE <- BCCH_A3 %>%
+  left_join(BE, by = c("breeding_rank" = "rank")) %>%
+  select(utm_square, breeding_code, category)
+
+
+
+```
+
+In the above code, `left_join` joins the BCCH and BE data, `by=c("breeding_rank = "rank")` lets R know that breeding rank and rank are the columns we want to join on.
+`select` is where we're narrowing down the columns we want in our output, by selecting those three columns to remain in our new dataset
+
+Now that we have our \~1,700 records, lets see if we can map it!
+
+### Uploading shapefiles
+
+Lets upload our UTM Square shapefile, and then join our BCCH data to it :) 
+
+1)  don't judge my file paths
+
+2)  beware that when you copy a file path the slashes are facing the wrong way
+
+```{r Read in utm_squares}
+
+utm_squares <- st_read("C:/Users/kbumelis/Documents/Atlas/Mapping/Atlas-3 Planning/On_Squares/On_Squares.shp")
+
+BCCH_UTM <- utm_squares %>%
+  left_join(BCCH_BE, by = c("SQUARE_ID" = "utm_square"))
+
+```
+
+### Lets map!
+
+First lets set out bounding box of the map to be the same as what we pulled the data for, and get the Open Street Map for it  
+
+```{r Lets Map!}
+
+pal <- colorFactor(c("red", "blue", "green"), domain = unique(utm_squares$category))
+
+leaflet(data = BCCH_UTM) %>%
+  addTiles() %>%  # Add OpenStreetMap tiles
+  addPolygons(fillColor = ~pal(category), color = "black", weight = 1, opacity = 1) %>%
+  addLegend("bottomright", pal = pal, values = ~category, title = "Category") 
+
+```
 
 ## Including Plots
 
