@@ -1,0 +1,94 @@
+---
+title: "ON Atlas Mapping"
+author: "Kaelyn Bumelis"
+date: "2024-11-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Downloading and visualizing Atlas data in R
+
+Lets see if we can take what we learned in Open Door Science and apply it to Atlas data :)
+
+### Step 1: Install packages
+
+```{r packages}
+library(naturecounts) #need this to download NC databases
+library(tidyverse) #collection of R packages for data science - tidyr, dplyr, and ggplot2
+library(leaflet) #this is an interactive map, needed as base for mapview
+library(mapview) #can take a snapshot of leaflet for static maps
+```
+
+A summary of the code for reference tables available to us through the NatureCounts R package can be found [here](https://birdscanada.github.io/NatureCounts_IntroTutorial/Data3.html). Some that I thought may be useful include:
+
+`meta_iba_codes()`: Important Bird Area (IBA) codes
+
+`meta_bcr_codes()`: Bird Conservation Region (BCR) codes
+
+`meta_species_codes()`: alpha-numeric codes for avian species
+
+`meta_species_taxonomy()`: codes and taxonomic information for all species
+
+`meta_collections()`: collections names and descriptions
+
+`meta_breeding_codes()`: breeding codes and descriptions
+
+`meta_project_protocols()`: project protocols
+
+`meta_protocol_types()`: protocol types and descriptions
+
+```{r reference tables}
+BE <- meta_breeding_codes()
+BE
+```
+
+For this exercise we'll just download the BE table (the species table takes a long time to load)
+
+### Filtering & downloading data
+
+When we go to download our data using the function `nc_data_dl()` there is some additional code we can use to filter the data before downloading it (ie. we only have to download a fraction of the data if we don't need it all!)
+
+Some of the parameters include: `collections`, `species`, `years`, `doy` (day-of-year), and `region`
+
+Most of these are self-explanatory, however, Region can be as broad or fine-scale as you'd like! For example:
+
+`region = list(bcr = "13")` OR
+
+`region = list(bbox = c(left = -81.7, bottom = 44.5, right = -80.9, top = 45.3))`
+
+So, lets put this all together to filter Black-capped Chickadee data for Southern ON :)
+
+Our first task will be figuring out what the species code is for Black-capped Chickadee, for this we'll need to use the `search_species_code` function if we know the 4-letter code, or we can use the `search_species` function otherwise.
+
+```{r search species}
+search_species_code("BCCH")
+```
+
+This print-out shows us the species_id of BCCH is 14280! We'll use that in our next step of filtering BCCH data in Southern ON. Now I'll just go on Google Maps to come up with some lat/lon numbers for our filtering extent :)
+
+```{r filter & download}
+
+BCCH_A3 <- nc_data_dl(collections = "ONATLAS3BE_SUMM", 
+                      species = 14280, 
+                      region = list(bbox = c(left = -83.32, bottom = 41.40, 
+                                             right = -73.91, top = 46.93)), 
+                      username = "kbumelis", info = "mapping example")
+
+```
+
+Please note that if you have permissions for a specific collection (rather than blanket permissions to the Atlas) you'll need to include a line for your request ID, the code will look something like this: `request_id = 000000` If you're unsure of your request ID number, you can use the code `nc_requests(username = "testuser")` to find out!
+
+Alrighty - now that we have our \~1,700 records, lets see if we can map it!
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
